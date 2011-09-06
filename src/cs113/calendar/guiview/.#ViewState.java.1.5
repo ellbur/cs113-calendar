@@ -1,0 +1,150 @@
+package cs113.calendar.guiview;
+
+import java.util.Calendar;
+
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.EventListenerList;
+
+/**
+ * Singleton object used to represent the global state of the GUI. May take on
+ * one of the states defined in the <code>State</code> enum.
+ * 
+ * @author Michael Koval
+ */
+public class ViewState {
+	
+	private static ViewState instance;
+	
+	private EventListenerList listeners;
+	
+	private State state;
+	private Calendar date;
+
+	/**
+	 * Named states. The interface MUST be in exactly one of these states at any
+	 * given time.
+	 * 
+	 * @author Michael Koval
+	 */
+	public enum State {
+		/**
+		 * Wall-calendar view of an entire month displayed in a grid. Does not
+		 * show appointment duration.
+		 */
+		MONTH,
+		/**
+		 * Horizontal table that displays the seven days in the current week.
+		 * Appointment size reflects duration.
+		 */
+		WEEK,
+		/**
+		 * Single day in the <code>WEEK</code> view expanded to fill the entire
+		 * region.
+		 */
+		DAY,
+		/**
+		 * User is not validated and must login prior to interacting with the
+		 * application
+		 */
+		UNAUTHORIZED,
+		/**
+		 * Special administrator interface used for creating and deleting users
+		 */
+		ADMIN,
+		/**
+		 * Displaying search results.
+		 */
+		SEARCH
+	}
+
+	/**
+	 * Enforce the singleton nature of the global state of this interface by
+	 * disallowing public use of this objects' constructor.
+	 * 
+	 * @return single, global, instance of ViewState
+	 */
+	public static ViewState getInstance() {
+		if (instance == null) {
+			instance = new ViewState();
+		}
+		return instance;
+	}
+
+	/**
+	 * Constructs a new ViewState, initialized to have a state of
+	 * State.UNAUTHORIZED.
+	 */
+	private ViewState() {
+		listeners = new EventListenerList();
+		state = State.UNAUTHORIZED;
+	}
+
+	/**
+	 * Change the state of the interface, notifying all eligible event
+	 * listeners.
+	 * 
+	 * @param s new state of the interface
+	 */
+	public void setState(State s) {
+		if (s == null) {
+			throw new NullPointerException("State must be non-null.");
+		}
+
+		// Avoid issuing firing an event if the state did not change by ensuring
+		// that we are not setting the state to its current value.
+		if (s != state) {
+			state = s;
+			fireEvent(new ChangeEvent(this));
+		}
+	}
+	
+	public void setState(State s, Calendar date) {
+		if (s == null) {
+			throw new NullPointerException("State must be non-null");
+		}
+		
+		boolean changed = false;
+		if (s != state || date != this.date)
+			changed = true;
+		
+		this.state = s;
+		this.date  = date;
+		
+		if (changed) {
+			fireEvent(new ChangeEvent(this));
+		}
+	}
+
+	/**
+	 * Gets the current state of the interface. Changed via the
+	 * <code>setState()</code> method.
+	 * 
+	 * @return current state of the interface
+	 */
+	public State getState() {
+		return state;
+	}
+	
+	public Calendar getDate() {
+		return date;
+	}
+	
+	void addChangeListener(ChangeListener listener) {
+		listeners.add(ChangeListener.class, listener);
+	}
+	
+	/**
+	 * Notify all event listeners that the state of this object has changed.
+	 * Called by the <code>setState()</code> method.
+	 * 
+	 * @param e event object to pass to the event handler
+	 */
+	protected void fireEvent(ChangeEvent e) {
+		for (ChangeListener list : listeners.getListeners(
+				ChangeListener.class))
+		{
+			list.stateChanged(e);
+		}
+	}
+}

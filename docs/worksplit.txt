@@ -1,0 +1,15 @@
+
+We are dividing the work by component. Names are tentative.
+Components:
+ - Login/Logout           - Michael
+ - Appointment Settings   - Michael
+ - Display Area           - Owen
+   - Month
+   - Week
+   - Day
+   - Search Results
+ - Appointment Box        - Owen
+ - Admin                  - Michael
+ - Search                 - Michael
+ - Navigation             - Micheal
+
